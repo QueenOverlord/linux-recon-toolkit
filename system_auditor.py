@@ -1,32 +1,34 @@
 import subprocess
 import datetime
 
-def run_command(command: list) -> str | None:
+def run_command(command: list, show_error: bool = True) -> str | None:
     """
     Executes a shell command and returns its stdout.
-    Handles errors gracefully.
+    Handles errors gracefully. Can suppress error messages.
     """
     try:
-        # Execute the command
         result = subprocess.run(
-            command, 
-            capture_output=True, 
-            text=True, 
+            command,
+            capture_output=True,
+            text=True,
             check=True,
-            timeout=10  # Added a timeout for safety
+            timeout=10
         )
-        # Return the standard output if successful
         return result.stdout.strip()
     except FileNotFoundError:
-        print(f"❌ Error: Command not found: '{command[0]}'")
+        if show_error:
+            print(f"❌ Error: Command not found: '{command[0]}'")
         return None
     except subprocess.CalledProcessError as e:
-        # This catches errors if the command returns a non-zero exit code
-        print(f"❌ Error executing command: '{' '.join(command)}'")
-        print(f"   Stderr: {e.stderr.strip()}")
+        if show_error:
+            print(f"❌ Error executing command: '{' '.join(command)}'")
+            # Only show stderr if it contains something
+            if e.stderr:
+                print(f"   Stderr: {e.stderr.strip()}")
         return None
     except subprocess.TimeoutExpired:
-        print(f"❌ Error: Command timed out: '{' '.join(command)}'")
+        if show_error:
+            print(f"❌ Error: Command timed out: '{' '.join(command)}'")
         return None
 
 def get_active_users() -> str | None:
@@ -128,6 +130,37 @@ def get_listening_ports() -> str | None:
     report_body = "\n".join(parsed_ports)
     return f"{header}\n{report_body}\n"
 
+def check_cloud_metadata() -> str:
+    """
+    Checks if the machine has access to a standard cloud metadata service.
+    """
+    print("ℹ️  Checking for cloud metadata service...")
+    
+    # 169.254.169.254 is a non-routable IP used by cloud providers (AWS, GCP, Azure)
+    # for instance metadata.
+    # -s = silent, --connect-timeout 1 = fail after 1 second.
+    command = [
+        'curl', 
+        '-s', 
+        '--connect-timeout', 
+        '1', 
+        'http://169.254.169.254/latest/meta-data/'
+    ]
+    
+    output = run_command(command, show_error=False)
+
+    
+    header = "--- Cloud Instance Check ---"
+    
+    # the run_command returns None on failure (timeout, error, etc.)
+    if output is not None and output != "":
+        # Success means the service is accessible.
+        report_body = "✅ Cloud metadata service is accessible. This machine is likely a cloud instance."
+    else:
+        # Failure (timeout or other error) means the service is not there.
+        report_body = "ℹ️ Cloud metadata service not found. This is likely not a standard cloud instance."
+        
+    return f"{header}\n{report_body}\n"
 
 
 """
@@ -152,13 +185,22 @@ if __name__ == "__main__":
     else:
         print("❌ get_last_logins() failed to produce a report.\n")
         
-    # --- Test 3: Get Listening Ports (NEW) ---
+    # --- Test 3: Get Listening Ports ---
     listening_ports_report = get_listening_ports()
-    
     if listening_ports_report:
         print(listening_ports_report)
     else:
         print("❌ get_listening_ports() failed to produce a report.\n")
 
+    # --- Test 4: Check Cloud Metadata (NEW) ---
+    cloud_check_report = check_cloud_metadata()
+    if cloud_check_report:
+        print(cloud_check_report)
+    else:
+        # This case should ideally not be hit unless there's an unexpected error
+        print("❌ check_cloud_metadata() failed to produce a report.\n")
+
     print("="*30)
     print("--- Sanity Checks Complete ---")
+
+

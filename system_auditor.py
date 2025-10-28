@@ -81,17 +81,65 @@ def get_last_logins() -> str | None:
         
     return report_section
 
-# This line should be at the very end of your auditor.py file.
-# Make sure it is not indented.
+def get_listening_ports() -> str | None:
+    """
+    Finds all TCP/UDP ports in a listening state and the processes using them.
+    """
+    print("ℹ️  Scanning for listening ports (ss -tulpn)...")
+    
+    # ss = socket statistics. 
+    # -t = tcp, -u = udp, -l = listening, -p = processes, -n = numeric
+    command = ['ss', '-tulpn']
+    
+    output = run_command(command)
+    
+    if output is None:
+        return None # The command failed entirely.
+        
+    header = "--- Listening Ports ---"
+    
+    # The output of 'ss' has a header line. We need to skip it.
+    lines = output.strip().split('\n')
+    
+    # If there's only the header or less, no ports are listening.
+    if len(lines) <= 1:
+        return f"{header}\nNo listening ports found.\n"
+        
+    parsed_ports = []
+    # We start the loop from the second line to skip the header
+    for line in lines[1:]:
+        # ss output can have variable whitespace. Split handles this.
+        parts = line.split()
+        
+        # We expect at least 5 columns for a valid listening port line
+        if len(parts) >= 5:
+            local_address_port = parts[4]
+            process_info = parts[6] if len(parts) > 6 else 'N/A'
+            
+            # Clean up the process info string like 'users:(("nginx",pid=123,...))'
+            process_name = process_info.split('"')[1] if '"' in process_info else 'N/A'
+            
+            parsed_ports.append(f"  - Port: {local_address_port} | Process: {process_name}")
+
+    if not parsed_ports:
+        return f"{header}\nNo listening ports found.\n"
+
+    # Join the list of parsed ports into a single string with newlines
+    report_body = "\n".join(parsed_ports)
+    return f"{header}\n{report_body}\n"
+
+
+
+"""
+Sanity Check
+"""
 
 if __name__ == "__main__":
     print("--- Running Sanity Checks ---")
-    print("="*30) # A separator for visual clarity
+    print("="*30)
 
     # --- Test 1: Get Active Users ---
     active_users_report = get_active_users()
-    
-    # Check if the function returned a report string or None (an error)
     if active_users_report:
         print(active_users_report)
     else:
@@ -99,12 +147,18 @@ if __name__ == "__main__":
 
     # --- Test 2: Get Last Logins ---
     last_logins_report = get_last_logins()
-    
     if last_logins_report:
         print(last_logins_report)
     else:
         print("❌ get_last_logins() failed to produce a report.\n")
+        
+    # --- Test 3: Get Listening Ports (NEW) ---
+    listening_ports_report = get_listening_ports()
+    
+    if listening_ports_report:
+        print(listening_ports_report)
+    else:
+        print("❌ get_listening_ports() failed to produce a report.\n")
 
     print("="*30)
     print("--- Sanity Checks Complete ---")
-

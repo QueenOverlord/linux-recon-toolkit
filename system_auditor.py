@@ -162,45 +162,46 @@ def check_cloud_metadata() -> str:
         
     return f"{header}\n{report_body}\n"
 
+def main():
+    """
+    Main function to orchestrate the audit and generate the report.
+    """
+    print("🚀 Starting System Audit...")
+    
+    # 1. GATHER DATA
+    # Create a list of all the report sections from our audit functions.
+    report_parts = [
+        get_active_users(),
+        get_last_logins(),
+        get_listening_ports(),
+        check_cloud_metadata()
+    ]
+    
+    # Filter out any 'None' results from failed functions
+    valid_report_parts = [part for part in report_parts if part is not None]
+    
+    # 2. ASSEMBLE THE REPORT
+    # Generate a timestamp for the report header and filename
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    report_header = f"System Security Audit Report\nGenerated on: {timestamp}\n"
+    report_body = "\n".join(valid_report_parts)
+    
+    full_report = f"{report_header}\n{'-'*40}\n\n{report_body}"
+    
+    # 3. DELIVER THE REPORT
+    # Create a unique filename with a timestamp
+    filename_timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f"security_report_{filename_timestamp}.txt"
+    
+    try:
+        with open(filename, 'w') as f:
+            f.write(full_report)
+        print(f"✅ Report generated successfully: {filename}")
+    except IOError as e:
+        print(f"❌ Critical Error: Could not write report to file: {e}")
 
-"""
-Sanity Check
-"""
-
+# --- FINAL EXECUTION BLOCK ---
 if __name__ == "__main__":
-    print("--- Running Sanity Checks ---")
-    print("="*30)
-
-    # --- Test 1: Get Active Users ---
-    active_users_report = get_active_users()
-    if active_users_report:
-        print(active_users_report)
-    else:
-        print("❌ get_active_users() failed to produce a report.\n")
-
-    # --- Test 2: Get Last Logins ---
-    last_logins_report = get_last_logins()
-    if last_logins_report:
-        print(last_logins_report)
-    else:
-        print("❌ get_last_logins() failed to produce a report.\n")
-        
-    # --- Test 3: Get Listening Ports ---
-    listening_ports_report = get_listening_ports()
-    if listening_ports_report:
-        print(listening_ports_report)
-    else:
-        print("❌ get_listening_ports() failed to produce a report.\n")
-
-    # --- Test 4: Check Cloud Metadata (NEW) ---
-    cloud_check_report = check_cloud_metadata()
-    if cloud_check_report:
-        print(cloud_check_report)
-    else:
-        # This case should ideally not be hit unless there's an unexpected error
-        print("❌ check_cloud_metadata() failed to produce a report.\n")
-
-    print("="*30)
-    print("--- Sanity Checks Complete ---")
-
+    main()
 

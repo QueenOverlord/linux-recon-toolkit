@@ -1,0 +1,36 @@
+System Security Audit Report
+Generated on: 2025-10-27 22:57:27
+
+----------------------------------------
+
+--- Active Users ---
+pavloski pts/1        2025-10-27 20:52
+
+--- Last 10 Logins ---
+reboot   system boot  5.15.167.4-micro Mon Oct 27 20:50   still running
+reboot   system boot  5.15.167.4-micro Sun Oct 26 11:25   still running
+reboot   system boot  5.15.167.4-micro Mon Oct 20 21:25   still running
+reboot   system boot  5.15.167.4-micro Mon Oct 20 17:52   still running
+reboot   system boot  5.15.167.4-micro Sun Oct 19 14:42   still running
+reboot   system boot  5.15.167.4-micro Sat Oct 18 22:16   still running
+reboot   system boot  5.15.167.4-micro Sun Oct 12 22:40   still running
+reboot   system boot  5.15.167.4-micro Sun Oct 12 21:08   still running
+reboot   system boot  5.15.167.4-micro Sun Oct 12 11:28   still running
+reboot   system boot  5.15.167.4-micro Sat Oct 11 20:23   still running
+
+wtmp begins Sat Oct 11 19:47:07 2025
+
+--- Listening Ports ---
+  - Port: 127.0.0.54:53 | Process: N/A
+  - Port: 127.0.0.53%lo:53 | Process: N/A
+  - Port: 10.255.255.254:53 | Process: N/A
+  - Port: 127.0.0.1:323 | Process: N/A
+  - Port: [::1]:323 | Process: N/A
+  - Port: 127.0.0.1:33203 | Process: node
+  - Port: 10.255.255.254:53 | Process: N/A
+  - Port: 127.0.0.53%lo:53 | Process: N/A
+  - Port: 127.0.0.54:53 | Process: N/A
+  - Port: 127.0.0.1:4765 | Process: node
+
+--- Cloud Instance Check ---
+ℹ️ Cloud metadata service not found. This is likely not a standard cloud instance.

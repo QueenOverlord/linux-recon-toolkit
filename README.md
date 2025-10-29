@@ -57,7 +57,7 @@ This tool was built to demonstrate and practice key software engineering princip
 
 3.  **Run the script:**
     ```bash
-    python3 auditor.py
+    python3 system_auditor.py
     ```
 
 Upon completion, the script will generate a `security_report_[timestamp].txt` file in the same directory with the full audit results.
